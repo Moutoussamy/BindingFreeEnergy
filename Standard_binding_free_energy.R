@@ -34,11 +34,11 @@ k_pos = 0.1 #force constant used for restraining the position
 r0_conf_bound = 0 #equilibrium value for the prot/lig/ect conf
 r0_conf_unbound = 0 #equilibrium value for the prot/lig/ect conf
 r0_Ori_theta = 10 #Equilibrium value for the Theta angle
-r0_ori_Phi = 12.5 #Equilibrium value for the Phi angle
-r0_ori_Psi = 8.5 #Equilibrium value for the Psi angle
-r0_pol_theta = 5.5 #Equilibrium value for the theta polar angle
-r0_pol_phi = -49 #Equilibrium value for the phi polar angle
-r_star = 41 #defined r* (distance where to two partnes are not interacting anymore)
+r0_ori_Phi = 12 #Equilibrium value for the Phi angle
+r0_ori_Psi = 8 #Equilibrium value for the Psi angle
+r0_pol_theta = 5 #Equilibrium value for the theta polar angle
+r0_pol_phi = -60 #Equilibrium value for the phi polar angle
+r_star = 15 #defined r* (distance where to two partnes are not interacting anymore)
 
 ########################################################################################################################
 # PMFs: File the PMFs for each contributions
