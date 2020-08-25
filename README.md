@@ -9,3 +9,22 @@ Picture took from the tutotial:[Protein:ligand standard binding free energies: A
 
 
 Once all your simulations done, you can use this script to calculate the binding free energy. Please change the parameters according to your simulation parameters (force constant, temperature, ...).
+
+
+##output example (file: binding_free_energy.nrj):
+
+#Contribution	numerator(N)	denominator(D)	Ratio(N/D)	Energy (kcal/mol)
+RMSDb 	 x 	 x 	 x 	 x
+Theta 	 x	 x 	 x 	 x
+Phi 	 x 	 x 	 x 	 x
+Psi 	 x 	 x 	 x 	 x
+theta (PA) 	 x 	 x 	 x 	 x
+phi (PA) 	 x 	 x 	 x x
+Theta/Phi/Psi_bulk 	 - 	 - 	 - x
+I* 	 - 	 - 	 - x
+S* 	 - 	 - 	 - x
+RMSDf 	 x 	 x 	 x x
+
+K_eq =  x
+
+G_bind =  x kcal/mol
