@@ -33,12 +33,12 @@ k_ori = 0.1 #force constant used for restraining the orientation
 k_pos = 0.1 #force constant used for restraining the position
 r0_conf_bound = 0 #equilibrium value for the prot/lig/ect conf
 r0_conf_unbound = 0 #equilibrium value for the prot/lig/ect conf
-r0_Ori_theta = 10 #Equilibrium value for the Theta angle
-r0_ori_Phi = 12 #Equilibrium value for the Phi angle
-r0_ori_Psi = 8 #Equilibrium value for the Psi angle
-r0_pol_theta = 5 #Equilibrium value for the theta polar angle
-r0_pol_phi = -60 #Equilibrium value for the phi polar angle
-r_star = 15 #defined r* (distance where to two partnes are not interacting anymore)
+r0_ori_theta = 10 #Equilibrium value for the Theta angle
+r0_ori_Phi = 16 #Equilibrium value for the Phi angle
+r0_ori_Psi = 15 #Equilibrium value for the Psi angle
+r0_pol_theta = 29 #Equilibrium value for the theta polar angle
+r0_pol_phi = -39 #Equilibrium value for the phi polar angle
+r_star = 23 #defined r* (distance where to two partnes are not interacting anymore)
 
 ########################################################################################################################
 # PMFs: File the PMFs for each contributions
@@ -59,27 +59,39 @@ unbound = 'RmsdUnbound0.czar.pmf'
 ########################################################################################################################
 
 ########################################################################################################################
+# Function for contribution at site
+########################################################################################################################
+
+contrib <- function(k,r0,pmf){
+        #Function to calculate the contribution of restraining the mobile partner in the binding site
+        # works for RMSD bound, Theta, Phi and Psi
+        numerator = read.table(pmf) #read the data
+        denominator = numerator #duplicate the data
+        u = (k*(denominator[,1] - r0)^2)/2
+        denominator[,2] = denominator[,2] + u
+        numerator[,2] = exp(-beta*numerator[,2])
+        denominator[,2] = exp(-beta*denominator[,2])
+        x = seq(dim(denominator)[1])
+        id <- order(x)
+        AUC_denominator <- sum(diff(denominator[id,1])*rollmean(denominator[id,2],2)) #integration of the numerator
+        AUC_numerator <- sum(diff(numerator[id,1])*rollmean(numerator[id,2],2))#integration of the denominator
+        exp_beta = AUC_numerator/AUC_denominator
+        G = log(exp_beta)/beta
+
+        results = c(AUC_numerator,AUC_denominator,exp_beta,G)
+        return(results) # return denominator,numerator, ratio and energy
+}
+
+
+
+########################################################################################################################
 # Contribution for restraining the conformation of the prot/lig/ect (mobile patner)
 ########################################################################################################################
 
-numerator = read.table(bound) #read the data
-denominator = numerator #duplicate the data
 
-u = (k_conf*(denominator[,1] - r0_conf_bound)^2)/2
-
-
-denominator[,2] = denominator[,2] + u
-numerator[,2] = exp(-beta*numerator[,2])
-denominator[,2] = exp(-beta*denominator[,2])
-x = seq(dim(denominator)[1])
-id <- order(x)
-AUC_denominator <- sum(diff(denominator[id,1])*rollmean(denominator[id,2],2))
-AUC_numerator <- sum(diff(numerator[id,1])*rollmean(numerator[id,2],2))
-
-exp_beta_G_bound = AUC_numerator/AUC_denominator
-G_RMSDb = log(exp_beta_G_bound)/beta
-
-output_line = paste("RMSDb","\t",AUC_numerator,"\t",AUC_denominator,"\t",exp_beta_G_bound,"\t",G_RMSDb)
+ConfBound = contrib(k_conf,r0_conf_bound,bound)
+G_RMSDb = ConfBound[4]
+output_line = paste("RMSDb","\t",ConfBound[1],"\t",ConfBound[2],"\t",ConfBound[3],"\t",ConfBound[4])
 write(output_line,file=outfile,append = TRUE)
 
 
@@ -87,153 +99,51 @@ write(output_line,file=outfile,append = TRUE)
 # Contribution for restraining the orientation of the prot/lig/ect (mobile patner) with respect to Theta (Euler angle)
 ########################################################################################################################
 
-numerator = read.table(Theta_euler)#read the data
-denominator = numerator #duplicate the data
-
-
-u = (k_ori *(denominator[,1]- r0_Ori_theta)^2)/2
-denominator[,2] = denominator[,2] + u
-numerator[,2] = exp(-beta*numerator[,2])
-denominator[,2] = exp(-beta*denominator[,2])
-
-x = seq(dim(denominator)[1])
-id <- order(x)
-
-AUC_denominator <- sum(diff(denominator[id,1])*rollmean(denominator[id,2],2)) #integration of the numerator
-AUC_numerator <- sum(diff(numerator[id,1])*rollmean(numerator[id,2],2))  #integration of the denominator
-
-
-exp_beta_G_Theta = AUC_numerator/AUC_denominator
-G_Theta = log(exp_beta_G_Theta)/beta
-
-
-output_line = paste("Theta","\t",AUC_numerator,"\t",AUC_denominator,"\t",exp_beta_G_Theta,"\t",G_Theta)
+Theta = contrib(k_ori,r0_ori_theta,Theta_euler)
+G_Theta = Theta[4]
+output_line = paste("Theta","\t",Theta[1],"\t",Theta[2],"\t",Theta[3],"\t",Theta[4])
 write(output_line,file=outfile,append = TRUE)
 
 ########################################################################################################################
 # Contribution for restraining the orientation of the prot/lig/ect (mobile patner) with respect to Phi (Euler angle)
 ########################################################################################################################
 
-numerator = read.table(Phi_euler) #read the data
-denominator = numerator #duplicate the data
-
-
-u = (k_ori*(denominator[,1]-r0_ori_Phi)^2)/2
-
-denominator[,2] = denominator[,2] + u
-
-
-numerator[,2] = exp(-beta*numerator[,2]) #integration of the numerator
-denominator[,2] = exp(-beta*denominator[,2]) #integration of the denominator
-
-
-x = seq(dim(denominator)[1])
-id <- order(x)
-
-AUC_denominator <- sum(diff(denominator[id,1])*rollmean(denominator[id,2],2))
-AUC_numerator <- sum(diff(numerator[id,1])*rollmean(numerator[id,2],2))
-
-exp_beta_G_Phi = AUC_numerator/AUC_denominator
-G_Phi = log(exp_beta_G_Phi)/beta
-
-
-output_line = paste("Phi","\t",AUC_numerator,"\t",AUC_denominator,"\t",exp_beta_G_Phi,"\t",G_Phi)
+Phi = contrib(k_ori,r0_ori_Phi,Phi_euler)
+G_phi = Phi[4]
+output_line = paste("Phi","\t",Phi[1],"\t",Phi[2],"\t",Phi[3],"\t",Phi[4])
 write(output_line,file=outfile,append = TRUE)
 
 ########################################################################################################################
 # Contribution for restraining the orientation of the prot/lig/ect (mobile patner) with respect to Psi (Euler angle)
 ########################################################################################################################
 
-numerator = read.table(Psi_euler) #read the data
-denominator = numerator #duplicate the data
-
-u = (k_ori*(denominator[,1]- r0_ori_Psi)^2)/2
-denominator[,2] = denominator[,2] + u
-numerator[,2] = exp(-beta*numerator[,2])
-denominator[,2] = exp(-beta*denominator[,2])
-
-
-x = seq(dim(denominator)[1])
-id <- order(x)
-
-AUC_denominator <- sum(diff(denominator[id,1])*rollmean(denominator[id,2],2)) #integration of the numerator
-AUC_numerator <- sum(diff(numerator[id,1])*rollmean(numerator[id,2],2))  #integration of the denominator
-
-exp_beta_G_Psi = AUC_numerator/AUC_denominator
-G_Psi = log(exp_beta_G_Psi)/beta
-
-
-output_line = paste("Psi","\t",AUC_numerator,"\t",AUC_denominator,"\t",exp_beta_G_Psi,"\t",G_Psi)
+Psi = contrib(k_ori,r0_ori_Psi,Psi_euler)
+G_Psi = Psi[4]
+output_line = paste("Phi","\t",Psi[1],"\t",Psi[2],"\t",Psi[3],"\t",Psi[4])
 write(output_line,file=outfile,append = TRUE)
 
 ########################################################################################################################
 # Contribution for restraining the position of the prot/lig/ect (mobile patner) with respect to theta (Polar angle)
 ########################################################################################################################
 
-numerator = read.table(theta_polar)
-denominator = numerator
-
-u = (k_pos*(denominator[,1]- r0_pol_theta)^2)/2
-
-
-denominator[,2] = denominator[,2] + u
-
-
-
-numerator[,2] = exp(-beta*numerator[,2])
-denominator[,2] = exp(-beta*denominator[,2])
-
-x = seq(dim(denominator)[1])
-id <- order(x)
-
-AUC_denominator <- sum(diff(denominator[id,1])*rollmean(denominator[id,2],2))
-AUC_numerator <- sum(diff(numerator[id,1])*rollmean(numerator[id,2],2))
-
-exp_beta_G_thetapa = AUC_numerator/AUC_denominator
-G_theta = log(exp_beta_G_thetapa)/beta
-
-
-output_line = paste("theta (PA)","\t",AUC_numerator,"\t",AUC_denominator,"\t",exp_beta_G_thetapa,"\t",G_theta)
+pol_theta = contrib(k_pos,r0_pol_theta,theta_polar)
+G_theta = pol_theta[4]
+output_line = paste("theta_(PA)","\t",pol_theta[1],"\t",pol_theta[2],"\t",pol_theta[3],"\t",pol_theta[4])
 write(output_line,file=outfile,append = TRUE)
 
 ########################################################################################################################
 # Contribution for restraining the position of the prot/lig/ect (mobile patner) with respect to phi (Polar angle)
 ########################################################################################################################
 
-numerator = read.table(phi_polar)
-denominator = numerator
-
-
-u = (k_pos*(denominator[,1]- r0_pol_phi)^2)/2
-
-
-denominator[,2] = denominator[,2] + u
-
-
-
-numerator[,2] = exp(-beta*numerator[,2])
-denominator[,2] = exp(-beta*denominator[,2])
-
-x = seq(dim(denominator)[1])
-id <- order(x)
-
-AUC_denominator <- sum(diff(denominator[id,1])*rollmean(denominator[id,2],2))
-AUC_numerator <- sum(diff(numerator[id,1])*rollmean(numerator[id,2],2))
-
-exp_beta_G_phipa = AUC_numerator/AUC_denominator
-G_phi = log(exp_beta_G_phipa)/beta
-
-
-output_line = paste("phi (PA)","\t",AUC_numerator,"\t",AUC_denominator,"\t",exp_beta_G_phipa,G_phi)
+pol_phi = contrib(k_pos,r0_pol_phi,phi_polar)
+G_phi = pol_phi[4]
+output_line = paste("phi_(PA)","\t",pol_phi[1],"\t",pol_phi[2],"\t",pol_phi[3],"\t",pol_phi[4])
 write(output_line,file=outfile,append = TRUE)
-
 
 
 ########################################################################################################################
 # Contribution for releasing restrains on Theta, Phi and Psi (Euler angles) on bulk
 ########################################################################################################################
-
-
 
 
 #Function regarding Theta
@@ -323,7 +233,7 @@ phi <- function(x){
 }
 
 
-theta_part = integrate(theta, lower= 0,upper =pi)$value
+theta_part = integrate(theta, lower= 0,upper =pi/2)$value
 phi_part = integrate(phi, lower= 0,upper =2*pi)$value
 
 S_star = ((r_star)^2) * theta_part * phi_part
