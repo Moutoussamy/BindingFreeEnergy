@@ -19,7 +19,7 @@ library(zoo)
 ########################################################################################################################
 
 outfile = "binding_free_energy.nrj"
-write("#Contribution\tnumerator(N)\tdenominator(D)\tRatio(N/D)\tEnergy (kcal/mol)",file = outfile) #write header
+write("#Contribution numerator(N) denominator(D) Ratio(N/D) Energy_(kcal/mol)",file = outfile) #write header
 
 ########################################################################################################################
 # Parameters: modified it according to your simulations parameters
@@ -83,6 +83,16 @@ contrib <- function(k,r0,pmf){
 }
 
 
+write_results <- function(contribution,numerator,denominator,ratio,nrj){
+        # Write results in a csv format in the file "binding_free_energy.nrj"
+        # Easy to parse with python: if "#" not line line , line = line.split()
+        # Each line that not contain "#" has 6 elements (contrib, numerator, denominator, ratio and G)
+        # The final binding free energy is indicated with the tag #GBIND
+        # The Keq is indicated with the #KEQ tag
+        output_line = paste(contribution,numerator,denominator,ratio,nrj,sep = " ")
+        write(output_line,file=outfile,append = TRUE)
+}
+
 
 ########################################################################################################################
 # Contribution for restraining the conformation of the prot/lig/ect (mobile patner)
@@ -91,9 +101,7 @@ contrib <- function(k,r0,pmf){
 
 ConfBound = contrib(k_conf,r0_conf_bound,bound)
 G_RMSDb = ConfBound[4]
-output_line = paste("RMSDb","\t",ConfBound[1],"\t",ConfBound[2],"\t",ConfBound[3],"\t",ConfBound[4])
-write(output_line,file=outfile,append = TRUE)
-
+write_results("Rmsdb",ConfBound[1],ConfBound[2],ConfBound[3],ConfBound[4])
 
 ########################################################################################################################
 # Contribution for restraining the orientation of the prot/lig/ect (mobile patner) with respect to Theta (Euler angle)
@@ -101,8 +109,7 @@ write(output_line,file=outfile,append = TRUE)
 
 Theta = contrib(k_ori,r0_ori_theta,Theta_euler)
 G_Theta = Theta[4]
-output_line = paste("Theta","\t",Theta[1],"\t",Theta[2],"\t",Theta[3],"\t",Theta[4])
-write(output_line,file=outfile,append = TRUE)
+write_results("Theta",Theta[1],Theta[2],Theta[3],Theta[4])
 
 ########################################################################################################################
 # Contribution for restraining the orientation of the prot/lig/ect (mobile patner) with respect to Phi (Euler angle)
@@ -110,8 +117,7 @@ write(output_line,file=outfile,append = TRUE)
 
 Phi = contrib(k_ori,r0_ori_Phi,Phi_euler)
 G_phi = Phi[4]
-output_line = paste("Phi","\t",Phi[1],"\t",Phi[2],"\t",Phi[3],"\t",Phi[4])
-write(output_line,file=outfile,append = TRUE)
+write_results("Phi",Phi[1],Phi[2],Phi[3],Phi[4])
 
 ########################################################################################################################
 # Contribution for restraining the orientation of the prot/lig/ect (mobile patner) with respect to Psi (Euler angle)
@@ -119,8 +125,7 @@ write(output_line,file=outfile,append = TRUE)
 
 Psi = contrib(k_ori,r0_ori_Psi,Psi_euler)
 G_Psi = Psi[4]
-output_line = paste("Phi","\t",Psi[1],"\t",Psi[2],"\t",Psi[3],"\t",Psi[4])
-write(output_line,file=outfile,append = TRUE)
+write_results("Psi",Psi[1],Psi[2],Psi[3],Psi[4])
 
 ########################################################################################################################
 # Contribution for restraining the position of the prot/lig/ect (mobile patner) with respect to theta (Polar angle)
@@ -128,8 +133,8 @@ write(output_line,file=outfile,append = TRUE)
 
 pol_theta = contrib(k_pos,r0_pol_theta,theta_polar)
 G_theta = pol_theta[4]
-output_line = paste("theta_(PA)","\t",pol_theta[1],"\t",pol_theta[2],"\t",pol_theta[3],"\t",pol_theta[4])
-write(output_line,file=outfile,append = TRUE)
+write_results("theta",pol_theta[1],pol_theta[2],pol_theta[3],pol_theta[4])
+
 
 ########################################################################################################################
 # Contribution for restraining the position of the prot/lig/ect (mobile patner) with respect to phi (Polar angle)
@@ -137,8 +142,7 @@ write(output_line,file=outfile,append = TRUE)
 
 pol_phi = contrib(k_pos,r0_pol_phi,phi_polar)
 G_phi = pol_phi[4]
-output_line = paste("phi_(PA)","\t",pol_phi[1],"\t",pol_phi[2],"\t",pol_phi[3],"\t",pol_phi[4])
-write(output_line,file=outfile,append = TRUE)
+write_results("phi",pol_phi[1],pol_phi[2],pol_phi[3],pol_phi[4])
 
 
 ########################################################################################################################
@@ -180,8 +184,7 @@ exp_beta_G_bulk_o = (1/(8*pi^2)) * Theta_part * Phi_part * Psi_part
 G_bulk_o = log(exp_beta_G_bulk_o)/-beta
 
 
-output_line = paste("Theta/Phi/Psi_bulk","\t","-","\t","-","\t","-",G_bulk_o)
-write(output_line,file=outfile,append = TRUE)
+write_results("Theta/Phi/Psi_bulk","-","-","-",G_bulk_o)
 
 
 ########################################################################################################################
@@ -206,8 +209,8 @@ id <- order(x)
 
 AUC_I_star <- sum(diff(sep[id,1])*rollmean(sep[id,2],2))
 
-output_line = paste("I*","\t","-","\t","-","\t","-",AUC_I_star)
-write(output_line,file=outfile,append = TRUE)
+
+write_results("I*","-","-","-",AUC_I_star)
 
 
 ########################################################################################################################
@@ -238,8 +241,8 @@ phi_part = integrate(phi, lower= 0,upper =2*pi)$value
 
 S_star = ((r_star)^2) * theta_part * phi_part
 
-output_line = paste("S*","\t","-","\t","-","\t","-",S_star)
-write(output_line,file=outfile,append = TRUE)
+write_results("S*","-","-","-",S_star)
+
 
 ########################################################################################################################
 # Contribution for releasing restrains on the protein/lig/ect (mobile partner) conf. in bulk
@@ -269,10 +272,7 @@ exp_beta_G_free = AUC_numerator/AUC_denominator
 G_RMSDf = log(exp_beta_G_free)/beta
 
 
-output_line = paste("RMSDf","\t",AUC_numerator,"\t",AUC_denominator,"\t",exp_beta_G_free,G_RMSDf)
-write(output_line,file=outfile,append = TRUE)
-
-
+write_results("RMSDf",AUC_numerator,AUC_denominator,exp_beta_G_free,G_RMSDf)
 
 ########################################################################################################################
 ########################################################################################################################
@@ -285,12 +285,12 @@ SI_star = S_star*AUC_I_star #S*I* term
 exp_contrib = exp(-beta*(G_RMSDf+G_bulk_o-(G_phi+G_theta)-(G_Theta+G_Phi+G_Psi)-G_RMSDb))
 
 Keq = SI_star*exp_contrib #equilibium constant
-output_line = paste("\n\n\nK_eq = ",Keq)
+output_line = paste("\n#KEQ",Keq)
 write(output_line,file=outfile,append = TRUE)
 
 G_bind = -kb*T*log(Keq*(1/1661)) #binding free energy calculation
 
-output_line = paste("\n\n\nG_bind = ",G_bind,"kcal/mol")
+output_line = paste("\n#GBIND ",G_bind)
 write(output_line,file=outfile,append = TRUE)
 
 
