@@ -11,4 +11,4 @@ Picture took from the tutotial:[Protein:ligand standard binding free energies: A
 Once all your simulations done, you can use this script to calculate the binding free energy. Please change the parameters according to your simulation parameters (force constant, temperature, ...).
 
 
-All the results (each contribution and the final binding free energy) will be written in the file :"binding_free_energy.nrj"
+All the results (each contribution and the final binding free energy) will be written in the file : "binding_free_energy.nrj"
