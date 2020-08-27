@@ -82,6 +82,10 @@ contrib <- function(k,r0,pmf){
         return(results) # return denominator,numerator, ratio and energy
 }
 
+########################################################################################################################
+# Function for writting the results in outfile
+########################################################################################################################
+
 
 write_results <- function(contribution,numerator,denominator,ratio,nrj){
         # Write results in a csv format in the file "binding_free_energy.nrj"
@@ -146,7 +150,7 @@ write_results("phi",pol_phi[1],pol_phi[2],pol_phi[3],pol_phi[4])
 
 
 ########################################################################################################################
-# Contribution for releasing restrains on Theta, Phi and Psi (Euler angles) on bulk
+# Contribution for releasing restraints on Theta, Phi and Psi (Euler angles) on bulk
 ########################################################################################################################
 
 
