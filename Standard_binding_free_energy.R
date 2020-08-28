@@ -33,12 +33,12 @@ k_ori = 0.1 #force constant used for restraining the orientation
 k_pos = 0.1 #force constant used for restraining the position
 r0_conf_bound = 0 #equilibrium value for the prot/lig/ect conf
 r0_conf_unbound = 0 #equilibrium value for the prot/lig/ect conf
-r0_ori_theta = 10 #Equilibrium value for the Theta angle
-r0_ori_Phi = 16 #Equilibrium value for the Phi angle
-r0_ori_Psi = 15 #Equilibrium value for the Psi angle
-r0_pol_theta = 29 #Equilibrium value for the theta polar angle
-r0_pol_phi = -39 #Equilibrium value for the phi polar angle
-r_star = 23 #defined r* (distance where to two partnes are not interacting anymore)
+r0_ori_theta = 30 #Equilibrium value for the Theta angle
+r0_ori_Phi = 12.5 #Equilibrium value for the Phi angle
+r0_ori_Psi = 8.5 #Equilibrium value for the Psi angle
+r0_pol_theta = 3.5 #Equilibrium value for the theta polar angle
+r0_pol_phi = -3 #Equilibrium value for the phi polar angle
+r_star = 11 #defined r* (distance where to two partnes are not interacting anymore)
 
 ########################################################################################################################
 # PMFs: File the PMFs for each contributions
@@ -120,7 +120,7 @@ write_results("Theta",Theta[1],Theta[2],Theta[3],Theta[4])
 ########################################################################################################################
 
 Phi = contrib(k_ori,r0_ori_Phi,Phi_euler)
-G_phi = Phi[4]
+G_Phi = Phi[4]
 write_results("Phi",Phi[1],Phi[2],Phi[3],Phi[4])
 
 ########################################################################################################################
@@ -156,7 +156,7 @@ write_results("phi",pol_phi[1],pol_phi[2],pol_phi[3],pol_phi[4])
 
 #Function regarding Theta
 k_Theta = k_ori *(180/pi)^2
-Theta0 = r0_Ori_theta * (pi/180)
+Theta0 = r0_ori_theta * (pi/180)
 Theta <- function(x){
         sin(x)*exp(-beta*(0.5*k_Theta)*((x-Theta0))^2)
 }
@@ -204,6 +204,8 @@ sep[,2] = sep[,2]  + (2*kb*T*log10(sep[,1]))
 
 
 r_star_nearest = which.min(abs(sep[,1]-r_star))
+
+print(sep)
 
 sep[,2] = sep[,2] - sep[r_star_nearest,2]
 sep[,2] = exp(-beta*sep[,2])
