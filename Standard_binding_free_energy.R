@@ -242,7 +242,7 @@ phi <- function(x){
 }
 
 
-theta_part = integrate(theta, lower= 0,upper =pi/2)$value
+theta_part = integrate(theta, lower= 0,upper =pi)$value
 phi_part = integrate(phi, lower= 0,upper =2*pi)$value
 
 S_star = ((r_star)^2) * theta_part * phi_part
