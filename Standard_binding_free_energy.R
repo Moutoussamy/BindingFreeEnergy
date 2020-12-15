@@ -12,7 +12,7 @@ library(zoo)
 #
 # 2nd of december 2017
 #
-# If you want mor information about the method, please see: https://pubs.acs.org/doi/10.1021/ct3008099
+# If you want more information about the method, please see: https://pubs.acs.org/doi/10.1021/ct3008099
 #
 #
 ########################################################################################################################
